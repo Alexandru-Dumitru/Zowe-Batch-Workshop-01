@@ -1,0 +1,71 @@
+## Set up zosmf profile
+bright profiles create zosmf pe02brs --host 35.225.171.67  --port 443 --user cust001 --pass cust001 --reject-unauthorized false
+bright profiles create db2 pe02brs --host 35.225.171.67 --port 6017 --user cust001 --pass cust001 -d D10CPTIB
+
+## List the members
+bright files list ds "CUST001.BRIGHT.*"
+bright files list am "CUST001.BRIGHT.MARBLES.JCL"
+
+
+Check Stored Procedure:
+zowe db2 call sp "EVENT.MBSTOR01('WHITE',?)" --parameters 0
+
+Check Calling Program:
+zowe zos-jobs submit data-set "CUST001.BRIGHT.MARBLES.JCL(MBBLMN01)" --vasc
+
+Manual:
+zowe zos-jobs submit data-set "CUST001.BRIGHT.MARBLES.JCL(MBBLMN01)"
+zowe zos-jobs view jsbj JOBXXXXX
+zowe zos-jobs list sfbj JOBXXXXX
+zowe zos-jobs view sfbi JOBXXXXX 118
+
+
+##Modify Stored Procedure
+zowe files download am CUST001.BRIGHT.MARBLES.PARMLIB
+##modify file
+##Upload file:
+zowe files upload dtp cust001\bright\marbles\parmlib cust001.bright.marbles.parmlib
+
+##Modify Cobol programs
+zowe files download am CUST001.BRIGHT.MARBLES.COBOL
+##Modify mbstor01 and mbmain01
+zowe files upload dtp cust001\bright\marbles\cobol cust001.bright.marbles.cobol
+
+##Run and Compile using JCL:
+zowe zos-jobs submit data-set "CUST001.BRIGHT.MARBLES.JCL(MBBLSP01)" --vasc
+
+##Validate Stored Prodecure:
+zowe db2 call sp "EVENT.MBSTOR01('WHITE',?,?)" --parameters 0 0
+
+##Validate Application:
+zowe zos-jobs submit data-set "CUST001.BRIGHT.MARBLES.JCL(MBBLMN01)" --vasc
+
+git clone https://github.com/chipset/Brightside-Workshop-01
+npm install gulp-cli -g
+npm install
+
+git status
+git config --global user.email "donotchange@none.com"
+git config --global user.name "Donot Change"
+git commit -a -m "Adding tasks"
+git push
+
+gulp build
+
+
+## Copy completed files to correct locations  -- Linux version
+rm Jenkinsfile
+cp support/Jenkinsfile .
+rm gulpfile.js
+cp support/gulpfile.js .
+rm test/test.js
+cp support/test.js test/test.js
+
+
+## Copy completed files to correct locations  -- Windows
+del Jenkinsfile
+copy support\Jenkinsfile .
+del gulpfile.js
+copy support\gulpfile.js .
+del test\test.js
+copy support\test.js test\test.js
